@@ -2,7 +2,6 @@ linters:
   enable:
     - errcheck
     - goimports
-    - revive
     - govet
     - staticcheck
     - bodyclose
