@@ -33,6 +33,10 @@ func ToReader[T NoopRequestBody | any](t T) (io.Reader, error) {
 	return b, nil
 }
 
+type service struct {
+	client *Client
+}
+
 type Client struct {
 	httpClient *http.Client
 	userAgent  string
