@@ -6,6 +6,7 @@ type Option func(*Client)
 
 func WithAPIKey(a APIKey) Option {
 	return func(c *Client) {
+		c.apikey = a
 	}
 }
 

@@ -8,10 +8,13 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
+	"time"
 )
 
 const (
 	defaultUserAgent = "go-crunchybridge/sdk"
+	defaultBaseURL   = "https://api.crunchybridge.com"
 )
 
 var errNonNilContext = errors.New("context must be non-nil")
@@ -40,28 +43,46 @@ type service struct {
 type Client struct {
 	httpClient *http.Client
 	userAgent  string
+	service    service
+	apikey     APIKey
+
+	Account *AccountService
 }
 
 type APIKey string
 
+func (a APIKey) String() string { return string(a) }
+
 func New(opts ...Option) (*Client, error) {
-	c := &Client{}
+	c := &Client{
+		httpClient: &http.Client{
+			Timeout: time.Second * 30,
+		},
+	}
 
 	for _, opt := range opts {
 		opt(c)
 	}
 
+	srv := &service{client: c}
+
+	c.Account = (*AccountService)(srv)
 	return c, nil
 }
 
 func (c *Client) newRequest(method, resource string, body io.Reader) (*http.Request, error) {
-	req, err := http.NewRequest(method, resource, body)
+	if !strings.HasPrefix(resource, "/") {
+		return nil, errors.New("resource must contain a / prefix")
+	}
+
+	req, err := http.NewRequest(method, defaultBaseURL+resource, body)
 	if err != nil {
 		return nil, err
 	}
 
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("User-Agent", c.userAgent)
+	req.Header.Set("Authorization", "Bearer "+c.apikey.String())
 
 	return req, nil
 }

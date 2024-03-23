@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-type Account service
+type AccountService service
 
 type AuthenticatedAccount struct {
 	CreatedAt            time.Time `json:"created_at"`
@@ -23,7 +23,7 @@ type AuthenticatedAccount struct {
 	UpdatedAt            time.Time `json:"updated_at"`
 }
 
-func (a *Account) User(ctx context.Context) (AuthenticatedAccount, error) {
+func (a *AccountService) User(ctx context.Context) (AuthenticatedAccount, error) {
 	var resp AuthenticatedAccount
 
 	body, err := ToReader(NoopRequestBody{})
