@@ -30,3 +30,4 @@ jobs:
         run: go test -tags integration -v ./...
         env:
           INTEGRATION_API_KEY: ${{ secrets.INTEGRATION_API_KEY }}
+          TEAM_ID: ${{ secrets.TEAM_ID }}
