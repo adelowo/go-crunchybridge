@@ -114,7 +114,9 @@ func (c *Client) Do(ctx context.Context, req *http.Request, v any) (*http.Respon
 		return nil, errors.New("unexpected status code")
 	}
 
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	switch v := v.(type) {
 	case nil:
@@ -125,7 +127,7 @@ func (c *Client) Do(ctx context.Context, req *http.Request, v any) (*http.Respon
 
 		switch decErr {
 		case io.EOF:
-			decErr = nil
+			err = nil
 		default:
 			err = decErr
 		}
