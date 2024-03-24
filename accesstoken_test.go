@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestAccessToken_Create(t *testing.T) {
+func TestAccessToken(t *testing.T) {
 	client, err := New(
 		WithAPIKey(getAPIKey(t)),
 	)
@@ -23,4 +23,8 @@ func TestAccessToken_Create(t *testing.T) {
 	})
 	require.NoError(t, err)
 	require.NotEmpty(t, token.AccessToken)
+
+	// clean up the access token
+	err = client.AccessToken.Delete(context.Background(), token)
+	require.NoError(t, err)
 }

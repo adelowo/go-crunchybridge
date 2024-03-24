@@ -6,6 +6,8 @@ import (
 	"errors"
 	"net/http"
 	"time"
+
+	"github.com/adelowo/go-crunchybridge/internal/util"
 )
 
 type AccessTokenService service
@@ -58,4 +60,33 @@ func (a *AccessTokenService) Create(ctx context.Context,
 
 	_, err = a.client.Do(ctx, req, &resp)
 	return resp, err
+}
+
+func (a *AccessTokenService) Delete(ctx context.Context,
+	token AccessToken,
+) error {
+	if util.IsStringEmpty(token.ID) {
+		return errors.New("the id of the token to delete must be provided")
+	}
+
+	if util.IsStringEmpty(token.AccessToken) {
+		return errors.New(`access token to be deleted must be provided as crunchybridge
+requires a token can only be invalidated by itself`)
+	}
+
+	body, err := ToReader(NoopRequestBody{})
+	if err != nil {
+		return err
+	}
+
+	req, err := a.client.newRequest(http.MethodDelete,
+		"/access-tokens/"+token.ID, body)
+	if err != nil {
+		return err
+	}
+
+	req.Header.Set("Authorization", "Bearer "+token.AccessToken)
+
+	_, err = a.client.Do(ctx, req, nil)
+	return err
 }
