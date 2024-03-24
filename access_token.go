@@ -11,19 +11,17 @@ import (
 type AccessTokenService service
 
 type CreateAccessTokenOptions struct {
-	ClientSecret string    `json:"client_secret,omitempty"`
-	ExpiresAt    time.Time `json:"expires_at,omitempty"`
+	clientSecret string
+	ExpiresAt    time.Time
 }
 
 func (c CreateAccessTokenOptions) MarshalJSON() ([]byte, error) {
-	type Alias CreateAccessTokenOptions
-
 	return json.Marshal(&struct {
-		ExpiresAt string `json:"expires_at"`
-		Alias
+		ExpiresAt    string `json:"expires_at"`
+		ClientSecret string `json:"client_secret"`
 	}{
-		Alias:     (Alias)(c),
-		ExpiresAt: c.ExpiresAt.Format(time.RFC3339),
+		ClientSecret: c.clientSecret,
+		ExpiresAt:    c.ExpiresAt.Format(time.RFC3339),
 	})
 }
 
@@ -46,7 +44,7 @@ func (a *AccessTokenService) Create(ctx context.Context,
 		return resp, errors.New("the expiration date must be more than 1 minute")
 	}
 
-	opts.ClientSecret = a.client.apikey.String()
+	opts.clientSecret = a.client.apikey.String()
 
 	body, err := ToReader(opts)
 	if err != nil {

@@ -22,6 +22,5 @@ func TestAccessToken_Create(t *testing.T) {
 		ExpiresAt: time.Now().Add(time.Hour * 24),
 	})
 	require.NoError(t, err)
-
-	_ = token
+	require.NotEmpty(t, token.AccessToken)
 }
