@@ -45,7 +45,8 @@ type Client struct {
 	userAgent  string
 	apikey     APIKey
 
-	Account *AccountService
+	Account     *AccountService
+	AccessToken *AccessTokenService
 }
 
 type APIKey string
@@ -66,6 +67,8 @@ func New(opts ...Option) (*Client, error) {
 	srv := &service{client: c}
 
 	c.Account = (*AccountService)(srv)
+	c.AccessToken = (*AccessTokenService)(srv)
+
 	return c, nil
 }
 
