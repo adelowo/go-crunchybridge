@@ -8,7 +8,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"os"
 	"strings"
 	"time"
 )
@@ -118,7 +117,6 @@ func (c *Client) Do(ctx context.Context, req *http.Request, v any) (*Response, e
 
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusAccepted {
 		// TODO(adelowo): allow users to be able to make sense of the error message instead
-		io.Copy(os.Stdout, resp.Body)
 		return nil, errors.New("unexpected status code")
 	}
 
