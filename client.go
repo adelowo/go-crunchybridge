@@ -86,7 +86,11 @@ func (c *Client) newRequest(method, resource string, body io.Reader) (*http.Requ
 	return req, nil
 }
 
-func (c *Client) Do(ctx context.Context, req *http.Request, v any) (*http.Response, error) {
+type Response struct {
+	*http.Response
+}
+
+func (c *Client) Do(ctx context.Context, req *http.Request, v any) (*Response, error) {
 	if ctx == nil {
 		return nil, errNonNilContext
 	}
@@ -136,5 +140,5 @@ func (c *Client) Do(ctx context.Context, req *http.Request, v any) (*http.Respon
 		return nil, err
 	}
 
-	return resp, err
+	return &Response{resp}, err
 }
