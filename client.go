@@ -43,7 +43,6 @@ type service struct {
 type Client struct {
 	httpClient *http.Client
 	userAgent  string
-	service    service
 	apikey     APIKey
 
 	Account *AccountService
