@@ -42,7 +42,7 @@ func (a *AccessTokenService) Create(ctx context.Context,
 ) (AccessToken, error) {
 	var resp AccessToken
 
-	if opts.ExpiresAt.Sub(time.Now()) <= time.Minute {
+	if time.Until(opts.ExpiresAt) <= time.Minute {
 		return resp, errors.New("the expiration date must be more than 1 minute")
 	}
 
@@ -70,8 +70,7 @@ func (a *AccessTokenService) Delete(ctx context.Context,
 	}
 
 	if util.IsStringEmpty(token.AccessToken) {
-		return errors.New(`access token to be deleted must be provided as crunchybridge
-requires a token can only be invalidated by itself`)
+		return errors.New(`access token to be deleted must be provided as crunchybridge requires a token can only be invalidated by itself`)
 	}
 
 	body, err := ToReader(NoopRequestBody{})
