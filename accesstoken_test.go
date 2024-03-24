@@ -69,7 +69,6 @@ func TestAccessToken_DeleteValidation(t *testing.T) {
 		t.Run(v.name, func(t *testing.T) {
 			err := client.AccessToken.Delete(context.Background(), v.token)
 			require.Error(t, err)
-			t.Log(err)
 		})
 	}
 }

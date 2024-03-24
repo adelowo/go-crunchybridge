@@ -47,6 +47,7 @@ type Client struct {
 
 	Account     *AccountService
 	AccessToken *AccessTokenService
+	Certificate *CertificateService
 }
 
 type APIKey string
@@ -68,6 +69,7 @@ func New(opts ...Option) (*Client, error) {
 
 	c.Account = (*AccountService)(srv)
 	c.AccessToken = (*AccessTokenService)(srv)
+	c.Certificate = (*CertificateService)(srv)
 
 	return c, nil
 }
@@ -128,6 +130,12 @@ func (c *Client) Do(ctx context.Context, req *http.Request, v any) (*Response, e
 	case nil:
 	case io.Writer:
 		_, err = io.Copy(v, resp.Body)
+	case *string:
+		var s strings.Builder
+		_, err = io.Copy(&s, resp.Body)
+		if err == nil {
+			*v = s.String()
+		}
 	default:
 		decErr := json.NewDecoder(resp.Body).Decode(v)
 
