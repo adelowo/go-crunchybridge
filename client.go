@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 	"time"
 )
@@ -45,7 +46,8 @@ type Client struct {
 	userAgent  string
 	apikey     APIKey
 
-	Account *AccountService
+	Account     *AccountService
+	AccessToken *AccessTokenService
 }
 
 type APIKey string
@@ -66,6 +68,8 @@ func New(opts ...Option) (*Client, error) {
 	srv := &service{client: c}
 
 	c.Account = (*AccountService)(srv)
+	c.AccessToken = (*AccessTokenService)(srv)
+
 	return c, nil
 }
 
@@ -114,6 +118,7 @@ func (c *Client) Do(ctx context.Context, req *http.Request, v any) (*Response, e
 
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusAccepted {
 		// TODO(adelowo): allow users to be able to make sense of the error message instead
+		io.Copy(os.Stdout, resp.Body)
 		return nil, errors.New("unexpected status code")
 	}
 
