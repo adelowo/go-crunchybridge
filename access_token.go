@@ -84,6 +84,8 @@ func (a *AccessTokenService) Delete(ctx context.Context,
 		return err
 	}
 
+	// update the Authorization token as it is a core requirement to
+	// make sure the api call is authenticated by the token to be invalidated
 	req.Header.Set("Authorization", "Bearer "+token.AccessToken)
 
 	_, err = a.client.Do(ctx, req, nil)
