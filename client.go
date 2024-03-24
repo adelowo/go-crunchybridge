@@ -8,10 +8,13 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
+	"time"
 )
 
 const (
 	defaultUserAgent = "go-crunchybridge/sdk"
+	defaultBaseURL   = "https://api.crunchybridge.com"
 )
 
 var errNonNilContext = errors.New("context must be non-nil")
@@ -33,36 +36,61 @@ func ToReader[T NoopRequestBody | any](t T) (io.Reader, error) {
 	return b, nil
 }
 
+type service struct {
+	client *Client
+}
+
 type Client struct {
 	httpClient *http.Client
 	userAgent  string
+	apikey     APIKey
+
+	Account *AccountService
 }
 
 type APIKey string
 
+func (a APIKey) String() string { return string(a) }
+
 func New(opts ...Option) (*Client, error) {
-	c := &Client{}
+	c := &Client{
+		httpClient: &http.Client{
+			Timeout: time.Second * 30,
+		},
+	}
 
 	for _, opt := range opts {
 		opt(c)
 	}
 
+	srv := &service{client: c}
+
+	c.Account = (*AccountService)(srv)
 	return c, nil
 }
 
 func (c *Client) newRequest(method, resource string, body io.Reader) (*http.Request, error) {
-	req, err := http.NewRequest(method, resource, body)
+	if !strings.HasPrefix(resource, "/") {
+		return nil, errors.New("resource must contain a / prefix")
+	}
+
+	req, err := http.NewRequest(method, defaultBaseURL+resource, body)
 	if err != nil {
 		return nil, err
 	}
 
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("User-Agent", c.userAgent)
+	req.Header.Set("Authorization", "Bearer "+c.apikey.String())
 
 	return req, nil
 }
 
-func (c *Client) Do(ctx context.Context, req *http.Request, v any) (*http.Response, error) {
+type Response struct {
+	*http.Response
+}
+
+func (c *Client) Do(ctx context.Context, req *http.Request, v any) (*Response, error) {
 	if ctx == nil {
 		return nil, errNonNilContext
 	}
@@ -89,7 +117,9 @@ func (c *Client) Do(ctx context.Context, req *http.Request, v any) (*http.Respon
 		return nil, errors.New("unexpected status code")
 	}
 
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	switch v := v.(type) {
 	case nil:
@@ -100,7 +130,7 @@ func (c *Client) Do(ctx context.Context, req *http.Request, v any) (*http.Respon
 
 		switch decErr {
 		case io.EOF:
-			decErr = nil
+			err = nil
 		default:
 			err = decErr
 		}
@@ -110,5 +140,5 @@ func (c *Client) Do(ctx context.Context, req *http.Request, v any) (*http.Respon
 		return nil, err
 	}
 
-	return resp, err
+	return &Response{resp}, err
 }
