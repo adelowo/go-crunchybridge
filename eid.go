@@ -5,12 +5,16 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+
+	"github.com/adelowo/go-crunchybridge/internal/util"
 )
 
 var cachedBase32 = base32.StdEncoding.WithPadding(base32.NoPadding)
 
 // EID represents an encoded ID.
 type EID string
+
+func (e EID) IsEmpty() bool { return util.IsStringEmpty(e.String()) }
 
 func (e EID) IsValid() error {
 	if len(string(e)) != 26 {

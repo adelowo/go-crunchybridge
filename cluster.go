@@ -1,10 +1,186 @@
 package gocrunchybridge
 
+import (
+	"context"
+	"errors"
+	"fmt"
+	"net/http"
+	"strings"
+	"time"
+
+	"github.com/adelowo/go-crunchybridge/internal/util"
+	petname "github.com/dustinkirkland/golang-petname"
+)
+
 type ClusterService service
+
+// ENUM(production,dev)
+type ClusterEnvironment string
+
+// ENUM(aws,gcp,azure)
+type ClusterProvider string
+
+func (c *ClusterService) Create(ctx context.Context,
+	opts *CreateClusterOptions,
+) (Cluster, error) {
+	var cluster Cluster
+
+	if err := opts.Validate(); err != nil {
+		return cluster, err
+	}
+
+	body, err := ToReader(opts)
+	if err != nil {
+		return cluster, err
+	}
+
+	req, err := c.client.newRequest(http.MethodPost, "/clusters", body)
+	if err != nil {
+		return cluster, err
+	}
+
+	_, err = c.client.Do(ctx, req, &cluster)
+	return cluster, err
+}
 
 type CreateClusterOptions struct {
 	// Hunan readable name for the cluster. If non is provided,
 	// a default name would be generated for the cluster
-	Name   string
-	PlanID string
+	Name   string `json:"name,omitempty"`
+	PlanID string `json:"plan_id,omitempty"`
+	// You must have admin access to create a cluster
+	TeamID EID `json:"team_id,omitempty"`
+
+	ClusterGroupID EID `json:"cluster_group_id,omitempty"`
+
+	HighlyAvailable   bool `json:"is_ha,omitempty"`
+	KeychainID        EID  `json:"keychain_id,omitempty"`
+	NetworkID         EID  `json:"network_id,omitempty"`
+	PostgresVersionID int  `json:"postgres_version_id,omitempty"`
+	// You cannot set this and NetworkID together
+	RegionID    EID             `json:"region_id,omitempty"`
+	StorageSize int             `json:"storage_size,omitempty"`
+	ProviderID  ClusterProvider `json:"provider_id,omitempty"`
+
+	Environment ClusterEnvironment `json:"environment,omitempty"`
+}
+
+func (c *CreateClusterOptions) Validate() error {
+	if err := c.TeamID.IsValid(); err != nil {
+		return fmt.Errorf("team id: %v", err)
+	}
+
+	if util.IsStringEmpty(c.Name) {
+		c.Name = petname.Generate(3, "-")
+	}
+
+	if util.IsStringEmpty(c.PlanID) {
+		return errors.New("please provide a plan ID")
+	}
+
+	splitted := strings.Split(c.PlanID, "-")
+	if len(splitted) != 2 {
+		return errors.New("please provide a valid plan ID. Plan ID must be in this format: hobby-1,standard-1")
+	}
+
+	if err := c.ClusterGroupID.IsValid(); err != nil {
+		return fmt.Errorf("cluster_group_id: %v", err)
+	}
+
+	if !c.Environment.IsValid() {
+		return errors.New("environment: please provide a valid environment value")
+	}
+
+	if !util.IsStringEmpty(c.KeychainID.String()) {
+		if err := c.KeychainID.IsValid(); err != nil {
+			return fmt.Errorf("keychain_id: %v", err)
+		}
+	}
+
+	if !util.IsStringEmpty(c.NetworkID.String()) {
+		if err := c.NetworkID.IsValid(); err != nil {
+			return fmt.Errorf("network_id: %v", err)
+		}
+	}
+
+	if c.PostgresVersionID < 12 {
+		return errors.New("minimum supported postgres version is 12")
+	}
+
+	if c.ProviderID.IsValid() {
+		return errors.New("provider_id: please provide a valid and supported cloud provider")
+	}
+
+	if !util.IsStringEmpty(c.RegionID.String()) {
+		if err := c.RegionID.IsValid(); err != nil {
+			return fmt.Errorf("region_id: %v", err)
+		}
+	}
+
+	if c.StorageSize < 5 {
+		return errors.New("minimum storage is 5GB")
+	}
+
+	return nil
+}
+
+type ClusterDiskUsage struct {
+	DiskAvailableMb int `json:"disk_available_mb"`
+	DiskTotalSizeMb int `json:"disk_total_size_mb"`
+	DiskUsedMb      int `json:"disk_used_mb"`
+}
+
+type Cluster struct {
+	ClusterID              any                `json:"cluster_id"`
+	CPU                    int                `json:"cpu"`
+	CreatedAt              time.Time          `json:"created_at"`
+	DiskUsage              ClusterDiskUsage   `json:"disk_usage"`
+	Environment            ClusterEnvironment `json:"environment"`
+	Host                   string             `json:"host"`
+	ID                     EID                `json:"id"`
+	IsHighlyAvailable      bool               `json:"is_ha"`
+	IsProtected            bool               `json:"is_protected"`
+	IsSuspended            bool               `json:"is_suspended"`
+	MaintenanceWindowStart int                `json:"maintenance_window_start"`
+	MajorVersion           int                `json:"major_version"`
+	Memory                 int                `json:"memory"`
+	Name                   string             `json:"name"`
+	NetworkID              EID                `json:"network_id"`
+	ParentID               EID                `json:"parent_id"`
+	PlanID                 string             `json:"plan_id"`
+	PostgresVersionID      int64              `json:"postgres_version_id"`
+	ProviderID             EID                `json:"provider_id"`
+	RegionID               EID                `json:"region_id"`
+	Replicas               []struct {
+		ClusterID              EID                `json:"cluster_id"`
+		CPU                    int                `json:"cpu"`
+		CreatedAt              time.Time          `json:"created_at"`
+		DiskUsage              ClusterDiskUsage   `json:"disk_usage"`
+		Environment            ClusterEnvironment `json:"environment"`
+		Host                   string             `json:"host"`
+		ID                     EID                `json:"id"`
+		IsHighlyAvailable      bool               `json:"is_ha"`
+		IsProtected            bool               `json:"is_protected"`
+		IsSuspended            bool               `json:"is_suspended"`
+		MaintenanceWindowStart int                `json:"maintenance_window_start"`
+		MajorVersion           int                `json:"major_version"`
+		Memory                 int                `json:"memory"`
+		Name                   string             `json:"name"`
+		NetworkID              EID                `json:"network_id"`
+		ParentID               EID                `json:"parent_id"`
+		PlanID                 string             `json:"plan_id"`
+		PostgresVersionID      int64              `json:"postgres_version_id"`
+		ProviderID             EID                `json:"provider_id"`
+		RegionID               EID                `json:"region_id"`
+		ResetStatsWeekly       bool               `json:"reset_stats_weekly"`
+		Storage                int                `json:"storage"`
+		TailscaleActive        bool               `json:"tailscale_active"`
+		TeamID                 EID                `json:"team_id"`
+		UpdatedAt              time.Time          `json:"updated_at"`
+	} `json:"replicas"`
+	ResetStatsWeekly bool      `json:"reset_stats_weekly"`
+	Storage          int       `json:"storage"`
+	TailscaleActive  bool      `json:"tailscale_active"`
+	TeamID           EID       `json:"team_id"`
+	UpdatedAt        time.Time `json:"updated_at"`
 }
