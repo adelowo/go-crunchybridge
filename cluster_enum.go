@@ -14,8 +14,6 @@ import (
 const (
 	// ClusterEnvironmentProduction is a ClusterEnvironment of type production.
 	ClusterEnvironmentProduction ClusterEnvironment = "production"
-	// ClusterEnvironmentDev is a ClusterEnvironment of type dev.
-	ClusterEnvironmentDev ClusterEnvironment = "dev"
 )
 
 var ErrInvalidClusterEnvironment = errors.New("not a valid ClusterEnvironment")
@@ -34,7 +32,6 @@ func (x ClusterEnvironment) IsValid() bool {
 
 var _ClusterEnvironmentValue = map[string]ClusterEnvironment{
 	"production": ClusterEnvironmentProduction,
-	"dev":        ClusterEnvironmentDev,
 }
 
 // ParseClusterEnvironment attempts to convert a string to a ClusterEnvironment.

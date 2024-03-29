@@ -14,7 +14,7 @@ import (
 
 type ClusterService service
 
-// ENUM(production,dev)
+// ENUM(production)
 type ClusterEnvironment string
 
 // ENUM(aws,gcp,azure)
@@ -58,8 +58,8 @@ type CreateClusterOptions struct {
 	NetworkID         EID  `json:"network_id,omitempty"`
 	PostgresVersionID int  `json:"postgres_version_id,omitempty"`
 	// You cannot set this and NetworkID together
-	RegionID    EID             `json:"region_id,omitempty"`
-	StorageSize int             `json:"storage_size,omitempty"`
+	RegionID    string          `json:"region_id,omitempty"`
+	StorageSize int             `json:"storage,omitempty"`
 	ProviderID  ClusterProvider `json:"provider_id,omitempty"`
 
 	Environment ClusterEnvironment `json:"environment,omitempty"`
@@ -83,8 +83,10 @@ func (c *CreateClusterOptions) Validate() error {
 		return errors.New("please provide a valid plan ID. Plan ID must be in this format: hobby-1,standard-1")
 	}
 
-	if err := c.ClusterGroupID.IsValid(); err != nil {
-		return fmt.Errorf("cluster_group_id: %v", err)
+	if !util.IsStringEmpty(c.ClusterGroupID.String()) {
+		if err := c.ClusterGroupID.IsValid(); err != nil {
+			return fmt.Errorf("cluster_group_id: %v", err)
+		}
 	}
 
 	if !c.Environment.IsValid() {
@@ -107,14 +109,12 @@ func (c *CreateClusterOptions) Validate() error {
 		return errors.New("minimum supported postgres version is 12")
 	}
 
-	if c.ProviderID.IsValid() {
+	if !c.ProviderID.IsValid() {
 		return errors.New("provider_id: please provide a valid and supported cloud provider")
 	}
 
-	if !util.IsStringEmpty(c.RegionID.String()) {
-		if err := c.RegionID.IsValid(); err != nil {
-			return fmt.Errorf("region_id: %v", err)
-		}
+	if util.IsStringEmpty(c.RegionID) {
+		return errors.New("region_id: please provide a region ID")
 	}
 
 	if c.StorageSize < 5 {
@@ -143,12 +143,12 @@ type Cluster struct {
 	IsSuspended            bool               `json:"is_suspended"`
 	MaintenanceWindowStart int                `json:"maintenance_window_start"`
 	MajorVersion           int                `json:"major_version"`
-	Memory                 int                `json:"memory"`
+	Memory                 float64            `json:"memory"`
 	Name                   string             `json:"name"`
 	NetworkID              EID                `json:"network_id"`
 	ParentID               EID                `json:"parent_id"`
 	PlanID                 string             `json:"plan_id"`
-	PostgresVersionID      int64              `json:"postgres_version_id"`
+	PostgresVersionID      string             `json:"postgres_version_id"`
 	ProviderID             EID                `json:"provider_id"`
 	RegionID               EID                `json:"region_id"`
 	Replicas               []struct {

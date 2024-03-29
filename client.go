@@ -116,7 +116,7 @@ func (c *Client) Do(ctx context.Context, req *http.Request, v any) (*Response, e
 		return nil, err
 	}
 
-	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusAccepted {
+	if resp.StatusCode > http.StatusCreated {
 		// TODO(adelowo): allow users to be able to make sense of the error message instead
 		return nil, errors.New("unexpected status code")
 	}
