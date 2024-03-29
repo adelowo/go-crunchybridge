@@ -21,13 +21,13 @@ func TestCluster(t *testing.T) {
 	client := getClient(t)
 
 	cluster, err := client.Cluster.Create(context.Background(),
-		&gocrunchybridge.CreateClusterOptions{
+		&CreateClusterOptions{
 			PlanID:            "hobby-0",
-			TeamID:            getTeamID(t),
+			TeamID:            EID(getTeamID(t)),
 			RegionID:          "eu-west-2",
-			ProviderID:        gocrunchybridge.ClusterProviderAws,
+			ProviderID:        "aws",
 			StorageSize:       10,
-			Environment:       gocrunchybridge.ClusterEnvironmentProduction,
+			Environment:       "production",
 			HighlyAvailable:   false,
 			PostgresVersionID: 16,
 		})
