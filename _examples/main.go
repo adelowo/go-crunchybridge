@@ -33,4 +33,9 @@ func main() {
 	}
 
 	json.NewEncoder(os.Stdout).Encode(cluster)
+
+	err = client.Cluster.Delete(context.Background(), cluster.ID)
+	if err != nil {
+		panic(err)
+	}
 }

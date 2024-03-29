@@ -43,6 +43,23 @@ func (c *ClusterService) Create(ctx context.Context,
 	return cluster, err
 }
 
+func (c *ClusterService) Delete(ctx context.Context, clusterID EID) error {
+
+	body, err := ToReader(NoopRequestBody{})
+	if err != nil {
+		return err
+	}
+
+	req, err := c.client.newRequest(http.MethodDelete,
+		fmt.Sprintf("/clusters/%s", clusterID), body)
+	if err != nil {
+		return err
+	}
+
+	_, err = c.client.Do(ctx, req, nil)
+	return err
+}
+
 type CreateClusterOptions struct {
 	// Hunan readable name for the cluster. If non is provided,
 	// a default name would be generated for the cluster
@@ -152,7 +169,7 @@ type Cluster struct {
 	ProviderID             EID                `json:"provider_id"`
 	RegionID               EID                `json:"region_id"`
 	Replicas               []struct {
-		ClusterID              EID                `json:"cluster_id"`
+		ClusterID              any                `json:"cluster_id"`
 		CPU                    int                `json:"cpu"`
 		CreatedAt              time.Time          `json:"created_at"`
 		DiskUsage              ClusterDiskUsage   `json:"disk_usage"`
@@ -164,12 +181,12 @@ type Cluster struct {
 		IsSuspended            bool               `json:"is_suspended"`
 		MaintenanceWindowStart int                `json:"maintenance_window_start"`
 		MajorVersion           int                `json:"major_version"`
-		Memory                 int                `json:"memory"`
+		Memory                 float64            `json:"memory"`
 		Name                   string             `json:"name"`
 		NetworkID              EID                `json:"network_id"`
 		ParentID               EID                `json:"parent_id"`
 		PlanID                 string             `json:"plan_id"`
-		PostgresVersionID      int64              `json:"postgres_version_id"`
+		PostgresVersionID      string             `json:"postgres_version_id"`
 		ProviderID             EID                `json:"provider_id"`
 		RegionID               EID                `json:"region_id"`
 		ResetStatsWeekly       bool               `json:"reset_stats_weekly"`
