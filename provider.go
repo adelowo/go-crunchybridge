@@ -59,7 +59,7 @@ func (p *ProviderService) Get(ctx context.Context,
 	}
 
 	for _, provider := range plan.Providers {
-		if strings.ToLower(provider.ID) == strings.ToLower(opts.Provider.String()) {
+		if strings.EqualFold(strings.ToLower(provider.ID), strings.ToLower(opts.Provider.String())) {
 			return provider, nil
 		}
 	}
