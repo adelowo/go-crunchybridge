@@ -10,6 +10,7 @@ import (
 
 	"github.com/adelowo/go-crunchybridge/internal/util"
 	petname "github.com/dustinkirkland/golang-petname"
+	"github.com/google/go-querystring/query"
 )
 
 type ClusterService service
@@ -75,6 +76,55 @@ func (c *ClusterService) Ping(ctx context.Context, clusterID EID) error {
 
 	_, err = c.client.Do(ctx, req, nil)
 	return err
+}
+
+func (c *ClusterService) List(ctx context.Context,
+	opts ListClusterOptions) (ListClusterResponse, error) {
+
+	var clusters ListClusterResponse
+
+	body, err := ToReader(NoopRequestBody{})
+	if err != nil {
+		return clusters, err
+	}
+
+	v, err := query.Values(opts)
+	if err != nil {
+		return clusters, err
+	}
+
+	endpoint := "/clusters?" + v.Encode()
+
+	req, err := c.client.newRequest(http.MethodGet, endpoint, body)
+	if err != nil {
+		return clusters, err
+	}
+
+	_, err = c.client.Do(ctx, req, &clusters)
+	return clusters, err
+}
+
+type ClusterOperationOptions struct {
+	ClusterID EID
+}
+
+// ENUM(asc,desc)
+type ListFilterOrderType string
+
+// ENUM(id,name)
+type ListOrderFieldType string
+
+type ListClusterOptions struct {
+	Order      ListFilterOrderType `url:"order,omitempty"`
+	OrderField string              `url:"order_field,omitempty"`
+	TeamID     EID                 `url:"team_id,omitempty"`
+	Limit      int                 `url:"limit,omitempty"`
+}
+
+type ListClusterResponse struct {
+	HasMore    bool      `json:"has_more,omitempty"`
+	Clusters   []Cluster `json:"clusters,omitempty"`
+	NextCursor EID       `json:"next_cursor,omitempty"`
 }
 
 type CreateClusterOptions struct {

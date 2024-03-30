@@ -4,6 +4,7 @@ go 1.22.0
 
 require (
 	github.com/dustinkirkland/golang-petname v0.0.0-20231002161417-6a283f1aaaf2
+	github.com/google/go-querystring v1.1.0
 	github.com/stretchr/testify v1.9.0
 )
 

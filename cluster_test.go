@@ -34,6 +34,12 @@ func TestCluster(t *testing.T) {
 
 	require.NoError(t, err)
 
+	resp, err := client.Cluster.List(context.Background(), ListClusterOptions{})
+	require.NoError(t, err)
+
+	require.Len(t, resp.Clusters, 1)
+	require.False(t, resp.HasMore)
+
 	err = client.Cluster.Delete(context.Background(), cluster.ID)
 	require.NoError(t, err)
 }

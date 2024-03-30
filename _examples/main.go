@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"os"
 
 	gocrunchybridge "github.com/adelowo/go-crunchybridge"
@@ -33,6 +34,14 @@ func main() {
 	}
 
 	json.NewEncoder(os.Stdout).Encode(cluster)
+
+	clusters, err := client.Cluster.List(context.Background(), gocrunchybridge.ListClusterOptions{})
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println()
+	json.NewEncoder(os.Stdout).Encode(clusters)
 
 	err = client.Cluster.Delete(context.Background(), cluster.ID)
 	if err != nil {

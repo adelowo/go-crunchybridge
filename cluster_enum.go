@@ -78,3 +78,71 @@ func ParseClusterProvider(name string) (ClusterProvider, error) {
 	}
 	return ClusterProvider(""), fmt.Errorf("%s is %w", name, ErrInvalidClusterProvider)
 }
+
+const (
+	// ListFilterOrderTypeAsc is a ListFilterOrderType of type asc.
+	ListFilterOrderTypeAsc ListFilterOrderType = "asc"
+	// ListFilterOrderTypeDesc is a ListFilterOrderType of type desc.
+	ListFilterOrderTypeDesc ListFilterOrderType = "desc"
+)
+
+var ErrInvalidListFilterOrderType = errors.New("not a valid ListFilterOrderType")
+
+// String implements the Stringer interface.
+func (x ListFilterOrderType) String() string {
+	return string(x)
+}
+
+// IsValid provides a quick way to determine if the typed value is
+// part of the allowed enumerated values
+func (x ListFilterOrderType) IsValid() bool {
+	_, err := ParseListFilterOrderType(string(x))
+	return err == nil
+}
+
+var _ListFilterOrderTypeValue = map[string]ListFilterOrderType{
+	"asc":  ListFilterOrderTypeAsc,
+	"desc": ListFilterOrderTypeDesc,
+}
+
+// ParseListFilterOrderType attempts to convert a string to a ListFilterOrderType.
+func ParseListFilterOrderType(name string) (ListFilterOrderType, error) {
+	if x, ok := _ListFilterOrderTypeValue[name]; ok {
+		return x, nil
+	}
+	return ListFilterOrderType(""), fmt.Errorf("%s is %w", name, ErrInvalidListFilterOrderType)
+}
+
+const (
+	// ListOrderFieldTypeId is a ListOrderFieldType of type id.
+	ListOrderFieldTypeId ListOrderFieldType = "id"
+	// ListOrderFieldTypeName is a ListOrderFieldType of type name.
+	ListOrderFieldTypeName ListOrderFieldType = "name"
+)
+
+var ErrInvalidListOrderFieldType = errors.New("not a valid ListOrderFieldType")
+
+// String implements the Stringer interface.
+func (x ListOrderFieldType) String() string {
+	return string(x)
+}
+
+// IsValid provides a quick way to determine if the typed value is
+// part of the allowed enumerated values
+func (x ListOrderFieldType) IsValid() bool {
+	_, err := ParseListOrderFieldType(string(x))
+	return err == nil
+}
+
+var _ListOrderFieldTypeValue = map[string]ListOrderFieldType{
+	"id":   ListOrderFieldTypeId,
+	"name": ListOrderFieldTypeName,
+}
+
+// ParseListOrderFieldType attempts to convert a string to a ListOrderFieldType.
+func ParseListOrderFieldType(name string) (ListOrderFieldType, error) {
+	if x, ok := _ListOrderFieldTypeValue[name]; ok {
+		return x, nil
+	}
+	return ListOrderFieldType(""), fmt.Errorf("%s is %w", name, ErrInvalidListOrderFieldType)
+}
