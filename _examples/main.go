@@ -19,9 +19,15 @@ func main() {
 		panic(err)
 	}
 
-	_, err = client.Provider.List(context.Background(), gocrunchybridge.FetchProviderOptions{
+	_, err = client.Provider.Get(context.Background(), gocrunchybridge.FetchProviderOptions{
 		Provider: gocrunchybridge.ClusterProviderAws,
 	})
+
+	plan, err := client.Provider.Get(context.Background(), gocrunchybridge.FetchProviderOptions{
+		Provider: gocrunchybridge.ClusterProviderGcp,
+	})
+
+	json.NewEncoder(os.Stdout).Encode(plan)
 
 	log.Fatal(err)
 
