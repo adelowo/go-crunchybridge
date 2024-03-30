@@ -29,11 +29,8 @@ func ToReader[T NoopRequestBody | any](t T) (io.Reader, error) {
 	enc := json.NewEncoder(b)
 	enc.SetEscapeHTML(false)
 	err := enc.Encode(t)
-	if err != nil {
-		return nil, err
-	}
 
-	return b, nil
+	return b, err
 }
 
 type service struct {
@@ -48,6 +45,7 @@ type Client struct {
 	Account     *AccountService
 	AccessToken *AccessTokenService
 	Certificate *CertificateService
+	Cluster     *ClusterService
 }
 
 type APIKey string
@@ -70,6 +68,7 @@ func New(opts ...Option) (*Client, error) {
 	c.Account = (*AccountService)(srv)
 	c.AccessToken = (*AccessTokenService)(srv)
 	c.Certificate = (*CertificateService)(srv)
+	c.Cluster = (*ClusterService)(srv)
 
 	return c, nil
 }
@@ -117,7 +116,7 @@ func (c *Client) Do(ctx context.Context, req *http.Request, v any) (*Response, e
 		return nil, err
 	}
 
-	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusAccepted {
+	if resp.StatusCode > http.StatusCreated {
 		// TODO(adelowo): allow users to be able to make sense of the error message instead
 		return nil, errors.New("unexpected status code")
 	}
