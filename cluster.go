@@ -26,6 +26,10 @@ func (c *ClusterService) Create(ctx context.Context,
 ) (Cluster, error) {
 	var cluster Cluster
 
+	if opts == nil {
+		return cluster, errors.New("nil options not accepted")
+	}
+
 	if err := opts.Validate(); err != nil {
 		return cluster, err
 	}
