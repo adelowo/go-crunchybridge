@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 
 	gocrunchybridge "github.com/adelowo/go-crunchybridge"
@@ -17,6 +18,12 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	_, err = client.Provider.List(context.Background(), gocrunchybridge.FetchProviderOptions{
+		Provider: gocrunchybridge.ClusterProviderAws,
+	})
+
+	log.Fatal(err)
 
 	cluster, err := client.Cluster.Create(context.Background(), &gocrunchybridge.CreateClusterOptions{
 		PlanID:            "hobby-0",
@@ -43,7 +50,9 @@ func main() {
 	fmt.Println()
 	json.NewEncoder(os.Stdout).Encode(clusters)
 
-	err = client.Cluster.Delete(context.Background(), cluster.ID)
+	err = client.Cluster.Delete(context.Background(), gocrunchybridge.FetchClusterOptions{
+		ID: cluster.ID,
+	})
 	if err != nil {
 		panic(err)
 	}

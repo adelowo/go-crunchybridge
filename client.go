@@ -46,6 +46,7 @@ type Client struct {
 	AccessToken *AccessTokenService
 	Certificate *CertificateService
 	Cluster     *ClusterService
+	Provider    *ProviderService
 }
 
 type APIKey string
@@ -69,6 +70,7 @@ func New(opts ...Option) (*Client, error) {
 	c.AccessToken = (*AccessTokenService)(srv)
 	c.Certificate = (*CertificateService)(srv)
 	c.Cluster = (*ClusterService)(srv)
+	c.Provider = (*ProviderService)(srv)
 
 	return c, nil
 }
