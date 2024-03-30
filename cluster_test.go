@@ -40,6 +40,8 @@ func TestCluster(t *testing.T) {
 	require.Len(t, resp.Clusters, 1)
 	require.False(t, resp.HasMore)
 
-	err = client.Cluster.Delete(context.Background(), cluster.ID)
+	err = client.Cluster.Delete(context.Background(), FetchClusterOptions{
+		ID: cluster.ID,
+	})
 	require.NoError(t, err)
 }

@@ -44,15 +44,20 @@ func (c *ClusterService) Create(ctx context.Context,
 	return cluster, err
 }
 
-func (c *ClusterService) Delete(ctx context.Context, clusterID EID) error {
+func (c *ClusterService) Delete(ctx context.Context,
+	opts FetchClusterOptions) error {
 
 	body, err := ToReader(NoopRequestBody{})
 	if err != nil {
 		return err
 	}
 
+	if err := opts.ID.IsValid(); err != nil {
+		return fmt.Errorf("cluster_id: %w", err)
+	}
+
 	req, err := c.client.newRequest(http.MethodDelete,
-		fmt.Sprintf("/clusters/%s", clusterID), body)
+		fmt.Sprintf("/clusters/%s", opts.ID), body)
 	if err != nil {
 		return err
 	}
@@ -61,15 +66,20 @@ func (c *ClusterService) Delete(ctx context.Context, clusterID EID) error {
 	return err
 }
 
-func (c *ClusterService) Ping(ctx context.Context, clusterID EID) error {
+func (c *ClusterService) Ping(ctx context.Context,
+	opts FetchClusterOptions) error {
 
 	body, err := ToReader(NoopRequestBody{})
 	if err != nil {
 		return err
 	}
 
+	if err := opts.ID.IsValid(); err != nil {
+		return fmt.Errorf("cluster_id: %w", err)
+	}
+
 	req, err := c.client.newRequest(http.MethodPut,
-		fmt.Sprintf("/clusters/%s/actions/ping", clusterID), body)
+		fmt.Sprintf("/clusters/%s/actions/ping", opts.ID), body)
 	if err != nil {
 		return err
 	}
@@ -104,8 +114,8 @@ func (c *ClusterService) List(ctx context.Context,
 	return clusters, err
 }
 
-type ClusterOperationOptions struct {
-	ClusterID EID
+type FetchClusterOptions struct {
+	ID EID
 }
 
 // ENUM(asc,desc)
