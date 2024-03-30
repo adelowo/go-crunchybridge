@@ -60,6 +60,23 @@ func (c *ClusterService) Delete(ctx context.Context, clusterID EID) error {
 	return err
 }
 
+func (c *ClusterService) Ping(ctx context.Context, clusterID EID) error {
+
+	body, err := ToReader(NoopRequestBody{})
+	if err != nil {
+		return err
+	}
+
+	req, err := c.client.newRequest(http.MethodPut,
+		fmt.Sprintf("/clusters/%s/actions/ping", clusterID), body)
+	if err != nil {
+		return err
+	}
+
+	_, err = c.client.Do(ctx, req, nil)
+	return err
+}
+
 type CreateClusterOptions struct {
 	// Hunan readable name for the cluster. If non is provided,
 	// a default name would be generated for the cluster
