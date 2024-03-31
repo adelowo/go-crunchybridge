@@ -129,8 +129,16 @@ func (c *Client) Do(ctx context.Context, req *http.Request, v any) (*Response, e
 	}
 
 	if resp.StatusCode > http.StatusCreated {
-		// TODO(adelowo): allow users to be able to make sense of the error message instead
-		return nil, errors.New("unexpected status code")
+
+		var s struct {
+			Message string `json:"message"`
+		}
+
+		if err := json.NewDecoder(resp.Body).Decode(&s); err != nil {
+			return nil, err
+		}
+
+		return nil, errors.New(s.Message)
 	}
 
 	defer func() {
