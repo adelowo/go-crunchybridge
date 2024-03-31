@@ -10,6 +10,8 @@ import (
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/adelowo/go-crunchybridge/internal/util"
 )
 
 const (
@@ -62,6 +64,14 @@ func New(opts ...Option) (*Client, error) {
 
 	for _, opt := range opts {
 		opt(c)
+	}
+
+	if util.IsStringEmpty(c.apikey.String()) {
+		return nil, errors.New("please provide your API key")
+	}
+
+	if c.httpClient == nil {
+		return nil, errors.New("please provide a useable HTTP client")
 	}
 
 	srv := &service{client: c}
